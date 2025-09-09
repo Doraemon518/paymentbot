@@ -18,8 +18,7 @@ main()
 router.post('/', (req, res) => {
   res.sendStatus(200)
   bot.processUpdate(req.body);
-  console.log(req.body)
-
+  
 })
 bot.onText(/\/start/, async (msg) => {
   try {
@@ -27,8 +26,8 @@ bot.onText(/\/start/, async (msg) => {
 
       reply_markup: {
         inline_keyboard: [
-          [{ text: '99/month', callback_data: '99' }],
-          [{ text: '499/month', callback_data: '499' }],
+          [{ text: '99/month', callback_data: '1' }],
+          [{ text: '499/month', callback_data: '2' }],
 
 
         ],
@@ -57,10 +56,28 @@ bot.on('callback_query', async (callback) => {
 
 
     console.log("✅ Payment request sent:", response.short_url);
-    await bot.sendMessage(callback.message.chat.id,`Pay the money here : ${response.short_url}`)
+    await bot.sendMessage(callback.message.chat.id,`Pay the money here. This link will expire after 15 minutes : ${response.short_url}`)
   } catch (err) {
     console.error("❌ Error in callback_query fetch:", err);
     await bot.sendMessage(callback.message.chat.id, "⚠️ Payment service is unavailable right now. Try again later.");
+  }
+
+})
+
+router.post('/paymentdone',async(req,res)=>{
+  if(req.body.secretOwn==process.env.SecretOwn){
+    res.status(200).send("OK")
+    console.log('success2')
+    if(Number(req.body.plan)==1){
+      bot.sendMessage(req.body.chat_id,`Through this message one time invite link of telegroup will be sent `)
+    }
+    else if(Number(req.body.plan)==2){
+      bot.sendMessage(req.body.chat_id,`Through this message id of mentor will be sent `)
+    }
+  }
+  else if(req.body.secretOwn!=process.env.SecretOwn){
+    res.status(400).send("not OK")
+    console.log('not success2')
   }
 
 })
