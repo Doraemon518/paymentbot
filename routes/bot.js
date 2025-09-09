@@ -6,8 +6,13 @@ Tele_token = process.env.bot_token;
 let bot = new TelegramBot(Tele_token)
 router.use(express.json())
 async function main() {
-  let webHookUrl = `${process.env.domain}/bot`
-  await bot.setWebHook(webHookUrl)
+   try {
+    let webHookUrl = `${process.env.domain}/bot`;
+    await bot.setWebHook(webHookUrl);
+    console.log("✅ Webhook set:", webHookUrl);
+  } catch (err) {
+    console.error("❌ Error setting webhook:", err);
+  }
 }
 main()
 router.post('/', (req, res) => {
@@ -37,18 +42,26 @@ bot.onText(/\/start/, async (msg) => {
 });
 bot.on('callback_query', async (callback) => {
   
-  let data = {
-    chat_id: callback.message.chat.id,
-    amount: callback.data
+  try {
+    let data = {
+      chat_id: callback.message.chat.id,
+      amount: callback.data
+    };
 
+    let a = await fetch(`${process.env.domain}/payment`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    let response=await a.json()
+
+
+    console.log("✅ Payment request sent:", response.short_url);
+    await bot.sendMessage(callback.message.chat.id,`Pay the money here : ${response.short_url}`)
+  } catch (err) {
+    console.error("❌ Error in callback_query fetch:", err);
+    await bot.sendMessage(callback.message.chat.id, "⚠️ Payment service is unavailable right now. Try again later.");
   }
-  let a = await fetch(`${process.env.domain}/payment`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  })
 
 })
 

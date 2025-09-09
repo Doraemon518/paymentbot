@@ -13,6 +13,7 @@
   "dependencies": {
     "dotenv": "^17.2.2",
     "express": "^4.21.2",
+    "node-telegram-bot-api": "^0.66.0",
     "razorpay": "^2.9.6"
   }
 }

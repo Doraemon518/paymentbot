@@ -10,26 +10,33 @@ let instance = new razorpay({
 
 
 router.post('/', async (req, res) => {
+    try {
     console.log(req.body);
+
     const paymentLink = await instance.paymentLink.create({
-        amount: 100,
-        currency: "INR",
-        description: "Access to Telegram Group",
-        customer: {
-            name: "Test User",
-            email: "nomail@gmail.com",
-            contact: "9999999999"
-        },
-        notify: {
-            sms: false,
-            email: false
-        },
-        callback_url: "https://yourdomain.com/payment-callback",
-        callback_method: "get"
+      amount: req.body.amount*100,
+      currency: "INR",
+      description: "Access to Telegram Group",
+      customer: {
+        name: "Test User",
+        email: "nomail@gmail.com",
+        contact: "7428723247"
+      },
+      notify: {
+        sms: false,
+        email: false
+      },
+      callback_url: `${process.env.domain}/confirmation`,
+      callback_method: "get"
     });
-    console.log(paymentLink)
-   
-    res.send(paymentLink)
+
+    console.log(paymentLink);
+    res.json(paymentLink);
+    
+  } catch (err) {
+    console.error("❌ Error creating payment link:", err);
+    res.status(500).json({ error: "Failed to create payment link" });
+  }
 })
 
 
